@@ -23,7 +23,7 @@ public class HibernateInterceptor extends EmptyInterceptor {
 			Object[] previousState, 
 			String[] propertyNames, 
 			Type[] types) {
-    log.info("Entity is dirty durring flush.");
+    log.info("Entity is dirty durring flush: {}", entity);
     return false;
 	}
 
@@ -51,11 +51,11 @@ public class HibernateInterceptor extends EmptyInterceptor {
 
 	@Override
 	public void postFlush(Iterator entities) {
-    log.info("After flush that saved entities to the database.");
+    log.info("After flush that pushed entities to the database.");
 	}
 
 	@Override
 	public void preFlush(Iterator entities) {
-    log.info("Before a flush.");
+    log.info("Before flush to push entities to the database.");
 	}
 }

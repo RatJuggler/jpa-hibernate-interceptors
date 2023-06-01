@@ -76,9 +76,14 @@ class JpaHibernateInterceptorsApplicationTests {
 
   /**
    * Find the Customer via it's primary key.
+   * - onLoad interceptor triggers for Customer.
+   * - Customer is loaded from database.
    * - postLoad event triggers for Customer and decodes secret.
    * Find the CustomerLink for the Customer via it's primary key.
-   * - postLoad event triggers for CustomerLink, but no events trigger for Customer.
+   * - NO events trigger for Customer.
+   * - onLoad interceptor triggers for CustomerLink.
+   * - CustomerLink is loaded from database.
+   * - postLoad event triggers for CustomerLink.
    * PASS: Secret is left decoded.
    */
   private void scenario1() {
@@ -101,10 +106,18 @@ class JpaHibernateInterceptorsApplicationTests {
 
   /**
    * Find the Customer via it's primary key.
+   * - onLoad interceptor triggers for Customer.
+   * - Customer is loaded from database.
    * - postLoad event triggers for Customer and decodes secret.
    * Find the CustomerLink for the Customer via the Customer entity.
+   * - preFlush interceptor triggers.
    * - preUpdate event triggers for Customer and encodes the secret.
-   * - Customer is not flushed to database, postUpdate event is NOT triggered.
+   * - onFlushDirty inceptor triggers for Customer (with secret encoded).
+   * - Customer is NOT flushed to database.
+   * - postUpdate event for Customer is NOT triggered.
+   * - postFlush interceptor is NOT triggered.
+   * - onLoad interceptor triggers for CustomerLink.
+   * - CustomerLink is loaded from database.
    * - postLoad event triggers for CustomerLink.
    * FAILS: Secret is left encoded.
    */
@@ -128,11 +141,18 @@ class JpaHibernateInterceptorsApplicationTests {
 
   /**
    * Find the Customer via it's primary key.
+   * - onLoad interceptor triggers for Customer.
+   * - Customer is loaded from database.
    * - postLoad event triggers for Customer and decodes secret.
    * Find the CustomerLink for the Customer via the Customer entity.
+   * - preFlush interceptor triggers.
    * - preUpdate event triggers for Customer and encodes the secret.
+   * - onFlushDirty inceptor triggers for Customer (with secret encoded).
    * - Customer is flushed to database.
    * - postUpdate event trigger for Customer and decodes the secret.
+   * - postFlush interceptor triggers.
+   * - onLoad interceptor triggers for CustomerLink.
+   * - CustomerLink is loaded from database.
    * - postLoad event triggers for CustomerLink.
    * FAILS: Secret is left decoded at the expense of an unwanted update.
    */
