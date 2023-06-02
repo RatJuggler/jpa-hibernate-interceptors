@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,14 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class JpaHibernateInterceptorsApplicationTests {
 
-	private static final Logger log = LoggerFactory.getLogger(JpaHibernateInterceptorsApplicationTests.class);
+  private static final Logger log = LoggerFactory.getLogger(JpaHibernateInterceptorsApplicationTests.class);
 
   @Autowired
   private EntityManager entityManager;
-  
+
   @Autowired
   private CustomerRepository customerRepository;
-  
+
   @Autowired
   private CustomerLinkRepository customerLinkRepository;
 
@@ -61,28 +62,31 @@ class JpaHibernateInterceptorsApplicationTests {
   }
 
   @Test
-	void testEverything() {
+  void testEverything() {
     populate();
 
     // scenario1();
+    // entityManager.flush();
     // entityManager.clear();
 
     scenario2();
+    entityManager.flush();
     entityManager.clear();
 
     // scenario3();
+    // entityManager.flush();
     // entityManager.clear();
   }
 
   /**
    * Find the Customer via it's primary key.
-   * - onLoad interceptor triggers for Customer.
    * - Customer is loaded from database.
+   * - onLoad interceptor triggers for Customer.
    * - postLoad event triggers for Customer and decodes secret.
    * Find the CustomerLink for the Customer via it's primary key.
    * - NO events trigger for Customer.
-   * - onLoad interceptor triggers for CustomerLink.
    * - CustomerLink is loaded from database.
+   * - onLoad interceptor triggers for CustomerLink.
    * - postLoad event triggers for CustomerLink.
    * PASS: Secret is left decoded.
    */
@@ -93,33 +97,31 @@ class JpaHibernateInterceptorsApplicationTests {
     log.info("");
     log.info("Find Customer with findById(1L):");
     log.info("--------------------------------");
-    Customer customer = customerRepository.findById(1L);
-    log.info(customer.toString());
+    customerRepository.findById(1L);
     log.info("");
 
     log.info("Find CustomerLink for the same Customer with findById(4L):");
     log.info("----------------------------------------------------------");
-    CustomerLink customerLink = customerLinkRepository.findById(4L);
-    log.info(customerLink.toString());
+    customerLinkRepository.findById(4L);
     log.info("");
   }
 
   /**
    * Find the Customer via it's primary key.
-   * - onLoad interceptor triggers for Customer.
    * - Customer is loaded from database.
+   * - onLoad interceptor triggers for Customer.
    * - postLoad event triggers for Customer and decodes secret.
    * Find the CustomerLink for the Customer via the Customer entity.
    * - preFlush interceptor triggers.
    * - preUpdate event triggers for Customer and encodes the secret.
-   * - onFlushDirty inceptor triggers for Customer (with secret encoded).
-   * - Customer is NOT flushed to database.
+   * - onFlushDirty inceptor triggers for Customer, decodes the secret and resets the states.
+   * - Customer is NOT flushed to database (because Hibernate has been fooled).
    * - postUpdate event for Customer is NOT triggered.
    * - postFlush interceptor is NOT triggered.
-   * - onLoad interceptor triggers for CustomerLink.
    * - CustomerLink is loaded from database.
+   * - onLoad interceptor triggers for CustomerLink.
    * - postLoad event triggers for CustomerLink.
-   * FAILS: Secret is left encoded.
+   * PASS: Secret is left decoded.
    */
   private void scenario2() {
     log.info("");
@@ -129,13 +131,11 @@ class JpaHibernateInterceptorsApplicationTests {
     log.info("Find Customer with findById(1L):");
     log.info("--------------------------------");
     Customer customer = customerRepository.findById(1L);
-    log.info(customer.toString());
     log.info("");
 
     log.info("Find CustomerLink for the same Customer with findByCustomer(customer):");
     log.info("----------------------------------------------------------------------");
-    CustomerLink customerLink = customerLinkRepository.findByCustomer(customer);
-    log.info(customerLink.toString());
+    customerLinkRepository.findByCustomer(customer);
     log.info("");
   }
 
@@ -164,13 +164,11 @@ class JpaHibernateInterceptorsApplicationTests {
     log.info("Find Customer with findById(1L):");
     log.info("-------------- -----------------");
     Customer customer = customerRepository.findById(1L);
-    log.info(customer.toString());
     log.info("");
 
     log.info("Find CustomerLink for the same Customer with findByCustomerId(customer.getId()):");
     log.info("--------------------------------------------------------------------------------");
-    CustomerLink customerLink = customerLinkRepository.findByCustomerId(customer.getId());
-    log.info(customerLink.toString());
+    customerLinkRepository.findByCustomerId(customer.getId());
     log.info("");
   }
 

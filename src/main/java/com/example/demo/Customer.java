@@ -5,10 +5,11 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 @Entity
 @EntityListeners(CustomerJpaEventListener.class)
-public class Customer {
+public class Customer implements EncodedMarker {
 
   @Id
   @GeneratedValue(strategy=GenerationType.AUTO)
@@ -16,6 +17,8 @@ public class Customer {
   private String firstName;
   private String lastName;
   private String secret;
+  @Transient
+  private boolean encoded;
 
   protected Customer() {}
 
@@ -27,7 +30,7 @@ public class Customer {
 
   @Override
   public String toString() {
-    return String.format("Customer[id=%d, firstName='%s', lastName='%s', secret='%s']", id, firstName, lastName, secret);
+    return String.format("Customer[id=%d, firstName='%s', lastName='%s', secret='%s', encoded='%s']", id, firstName, lastName, secret, isEncoded());
   }
 
   public Long getId() {
@@ -48,5 +51,14 @@ public class Customer {
 
   public void setSecret(String secret) {
     this.secret = secret;
+  }
+
+  public void setEncoded(boolean encoded) {
+    this.encoded = encoded;
+  }
+
+  @Override
+  public boolean isEncoded() {
+    return encoded;
   }
 }
